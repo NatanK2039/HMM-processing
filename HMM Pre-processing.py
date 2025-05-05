@@ -3,7 +3,8 @@ from scapy.all import rdpcap
 
 def main():
     print("This script will automatically perform the processing of a pcap file to encode it in a form suitable for multivariate HMM.")
-    getFiles()
+    files = getFiles()
+    encodeAndSave(files)
 
 def getFiles():
     endloop = False;
@@ -17,10 +18,10 @@ def getFiles():
             inputfile = getInputFile(endloopinput)
             print("File saved")
             outputfile = getOutputFile()
-        inputAndOutputFiles[inputfile] = outputfile
+            inputAndOutputFiles[inputfile] = outputfile
         for key in inputAndOutputFiles:
             print(key.name + " will be encoded and saved to " + inputAndOutputFiles[key])
-
+    return inputAndOutputFiles
 
 def getInputFile(filepath):
     if filepath == "none":
@@ -59,7 +60,6 @@ def loadFile(filepath):
     file = open(filepath)
     return file
 
-
 def getUserInput(message, *args):
     userResponse = input(message)
     if args:
@@ -69,14 +69,17 @@ def getUserInput(message, *args):
             return getUserInput("\n\nInvalid input. Answer with: " + ", ".join(args) + "\n", *args)
     return userResponse
  
-
-
-
-
 def createfile(filepath):
     newfile = open(filepath, "x")
     print("File created")
 
+def encodeAndSave(files):
+    for key in files:
+        packets = rdpcap(key.name)
+
+        with open(files[key], "w") as f:
+            for packet in packets:
+                f.write(str(packet) + "\n") 
 
 
 main()

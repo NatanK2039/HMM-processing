@@ -1,11 +1,8 @@
-import os.path
+import os
 from scapy.all import rdpcap
 
 def main():
     print("This script will automatically perform the processing of a pcap file to encode it in a form suitable for multivariate HMM.")
-    getFiles()
-
-def getFiles():
     getFiles()
 
 def getFiles():
@@ -20,7 +17,9 @@ def getFiles():
             inputfile = getInputFile(endloopinput)
             print("File saved")
             outputfile = getOutputFile()
-
+        inputAndOutputFiles[inputfile] = outputfile
+        for key in inputAndOutputFiles:
+            print(key.name + " will be encoded and saved to " + inputAndOutputFiles[key])
 
 
 def getInputFile(filepath):
@@ -36,6 +35,7 @@ def getInputFile(filepath):
 def getOutputFile():
     filepath = getUserInput("Where to save encoded data? Provide absolute path to .txt file (The file will be created if it does not yet exist)")
     checkfileexists(filepath, "txt")
+    return filepath
 
 def checkfileexists(filepath, type):
     if type == "pcap":
@@ -51,7 +51,7 @@ def checkfileexists(filepath, type):
         else:
             createfileselection = getUserInput("File does not exist. Create file? Enter yes or no.", "yes", "no")
             if createfileselection == "yes":
-                createfile()
+                createfile(filepath)
             else:
                 getOutputFile()            
 
@@ -73,8 +73,9 @@ def getUserInput(message, *args):
 
 
 
-def createfile():
-    print("stuff")
+def createfile(filepath):
+    newfile = open(filepath, "x")
+    print("File created")
 
 
 

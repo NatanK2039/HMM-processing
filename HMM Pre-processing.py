@@ -1,5 +1,5 @@
 import os
-from scapy.all import rdpcap
+import pyshark
 
 def main():
     print("This script will automatically perform the processing of a pcap file to encode it in a form suitable for multivariate HMM.")
@@ -75,12 +75,35 @@ def createfile(filepath):
 
 def encodeAndSave(files):
     for key in files:
-        packets = rdpcap(key.name)
+        packets = pyshark.FileCapture(key.name)
 
         with open(files[key], "w") as f:
             for packet in packets:
-                f.write(str(packet) + "\n") 
+                basicData = getBasicData(packet)
+                print(basicData)
 
+def getBasicData(packet):
+
+    try: 
+        timeStamp = packet.sniff_time.timestamp()
+    except:
+        timeStamp = "None"
+
+    httpLayer = "None"
+    httpCode = "None"
+
+    if "HTTP" in packet:
+        try:
+            if hasattr(packet.http, "request_method"):
+                httpLayer = packet.http.request_method
+            
+            if hasattr(packet.http, "response_code"):
+                httpCode = packet.http.response_code
+
+        except Exception as e:
+            pass
+
+    return [timeStamp, httpLayer, httpCode]
 
 main()
 #E:\ethical hacking examin\python assesme t\Mal.pcapng

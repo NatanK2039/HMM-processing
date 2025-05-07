@@ -1,5 +1,6 @@
 import os
 import pyshark
+import numpy as np
 
 def main():
     print("This script will automatically perform the processing of a pcap file to encode it in a form suitable for multivariate HMM.")
@@ -73,6 +74,8 @@ def createfile(filepath):
     newfile = open(filepath, "x")
     print("File created")
 
+
+
 def encodeAndSave(files):
     for key in files:
         packets = pyshark.FileCapture(key.name)
@@ -80,30 +83,129 @@ def encodeAndSave(files):
         with open(files[key], "w") as f:
             for packet in packets:
                 basicData = getBasicData(packet)
-                print(basicData)
+                if basicData is not None:
+                    f.write(str(basicData) + "\n")
+                    print(basicData)
 
 def getBasicData(packet):
-
-    try: 
+    try:
         timeStamp = packet.sniff_time.timestamp()
     except:
-        timeStamp = "None"
-
-    httpLayer = "None"
-    httpCode = "None"
+        timeStamp = np.nan
 
     if "HTTP" in packet:
+        httpCode = np.nan
+        httpLayer = np.nan
         try:
             if hasattr(packet.http, "request_method"):
-                httpLayer = packet.http.request_method
-            
+                httpLayer = convertMethodToHmmFormat(packet.http.request_method)
+            else: 
+                httpLayer = np.nan
+
             if hasattr(packet.http, "response_code"):
-                httpCode = packet.http.response_code
+                httpCode = convertCodeToHmmFormat(packet.http.response_code)
 
         except Exception as e:
             pass
 
-    return [timeStamp, httpLayer, httpCode]
+        return [timeStamp, httpLayer, httpCode]
+
+    elif "TCP" in packet:
+        tcp_layer = packet.tcp
+        if hasattr(tcp_layer, "flags"):
+            tcpFlags = convertTcpFlagToHmmFormat(tcp_layer.flags)
+            return [timeStamp, tcpFlags, packet.length]
+
+    return None  
+
+def convertMethodToHmmFormat(request_method):
+    match request_method:
+        case "GET":
+            return 1  
+        case "POST":
+            return 2  
+        case "PUT":
+            return 3  
+        case "DELETE":
+            return 4  
+        case "PATCH":
+            return 5  
+        case "OPTIONS":
+            return 6  
+        case "HEAD":
+            return 7  
+        case "CONNECT":
+            return 8  
+        case "TRACE":
+            return 9  
+        case _:
+            return np.nan
+
+def convertCodeToHmmFormat(http_code):
+    httpCode = None  
+
+    match http_code:
+        case "200":
+            httpCode = 1  
+        case "201":
+            httpCode = 2  
+        case "202":
+            httpCode = 3  
+        case "204":
+            httpCode = 4  
+        case "301":
+            httpCode = 5  
+        case "302":
+            httpCode = 6  
+        case "304":
+            httpCode = 7  
+        case "400":
+            httpCode = 8  
+        case "401":
+            httpCode = 9  
+        case "403":
+            httpCode = 10  
+        case "404":
+            httpCode = 11  
+        case "405":
+            httpCode = 12  
+        case "408":
+            httpCode = 13  
+        case "500":
+            httpCode = 14  
+        case "501":
+            httpCode = 15  
+        case "502":
+            httpCode = 16  
+        case "503":
+            httpCode = 17  
+        case "504":
+            httpCode = 18  
+        case "505":
+            httpCode = 19  
+        case _:
+            httpCode = np.nan
+
+    return httpCode
+
+def convertTcpFlagToHmmFormat(tcpFlags):
+    match tcpFlags:
+        case "0x00000010": 
+            return 1 
+        case "0x00000001": 
+            return 2  
+        case "0x00000100": 
+            return 3  
+        case "0x00010000": 
+            return 4  
+        case "0x00001000":
+            return 5
+        case "0x00100000":
+            return 6
+        case "0x00000011":
+            return 7
+        case _:
+            return np.nan
 
 main()
 #E:\ethical hacking examin\python assesme t\Mal.pcapng

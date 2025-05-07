@@ -122,7 +122,7 @@ def getBasicData(packet):
         try:
             if hasattr(packet.http, "request_method"): #If there is a request, extract it and convert to numeric format for model
                 httpLayer = convertMethodToHmmFormat(packet.http.request_method)
-             else: 
+            else:
                 httpLayer = np.nan
 
             if hasattr(packet.http, "response_code"): #If there is a response coce, extact it and convert to numeric format for model
@@ -233,7 +233,7 @@ def convertTcpFlagToHmmFormat(tcpFlags):
         case _:
             return np.nan
 
-#This function calculates the tiem difference between the timestamps 
+#This function calculates the tiem difference between the timestamps
 def calcTimeDifference(data, last_timestamps):
     timestamp, event, length_or_code = data
 
@@ -248,3 +248,5 @@ def calcTimeDifference(data, last_timestamps):
     return [event, length_or_code, time_diff]
 
 main()
+#E:\ethical hacking examin\python assesme t\Mal.pcapng
+#

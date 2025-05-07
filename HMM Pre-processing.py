@@ -15,6 +15,7 @@ def getFiles():
         endloopinput = getUserInput("Enter a file path to add a file, or enter Finish to finish adding files.")
         if endloopinput == "Finish":
             endloop = True
+            break;
         else:
             inputfile = getInputFile(endloopinput)
             print("File saved")
@@ -36,31 +37,38 @@ def getInputFile(filepath):
 
 def getOutputFile():
     filepath = getUserInput("Where to save encoded data? Provide absolute path to .txt file (The file will be created if it does not yet exist)")
-    checkfileexists(filepath, "txt")
-    return filepath
+    newfilepath = checkfileexists(filepath, "txt")
+    return newfilepath
 
 def checkfileexists(filepath, type):
     if type == "pcap":
         if os.path.isfile(filepath):
             if filepath.lower().endswith(('.pcap', '.pcapng')):
                 print("file exists")
+                return filepath
         else:
             print("File does not exist, try again.")
             getFiles()
     else:
         if os.path.isfile(filepath):
             print("File found")
+            return filepath
         else:
             createfileselection = getUserInput("File does not exist. Create file? Enter yes or no.", "yes", "no")
             if createfileselection == "yes":
                 createfile(filepath)
+                return filepath
             else:
-                getOutputFile()            
+                filepath = getOutputFile()    
+                return filepath        
 
 def loadFile(filepath):
-    file = open(filepath)
-    return file
-
+    try:
+        file = open(filepath)
+        return file
+    except Exception as e:
+        print("Invalid input caused by the first spelling mistake. restarting.")
+        main()
 def getUserInput(message, *args):
     userResponse = input(message)
     if args:
@@ -87,9 +95,8 @@ def encodeAndSave(files):
                 basicData = getBasicData(packet)
                 if basicData is not None:
                     Data = calcTimeDifference(basicData, lastEventTimestamps)
-
                     f.write(str(Data) + "\n")
-                    print(Data)
+        print("Data written to file")
 
 def getBasicData(packet):
     try:
@@ -225,3 +232,5 @@ def calcTimeDifference(data, last_timestamps):
     return [event, length_or_code, time_diff]
 
 main()
+#E:\ethical hacking examin\python assesme t\Mal.pcapng
+#

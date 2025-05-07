@@ -80,12 +80,16 @@ def encodeAndSave(files):
     for key in files:
         packets = pyshark.FileCapture(key.name)
 
+        lastEventTimestamps = {}
+
         with open(files[key], "w") as f:
             for packet in packets:
                 basicData = getBasicData(packet)
                 if basicData is not None:
-                    f.write(str(basicData) + "\n")
-                    print(basicData)
+                    Data = calcTimeDifference(basicData, lastEventTimestamps)
+
+                    f.write(str(Data) + "\n")
+                    print(Data)
 
 def getBasicData(packet):
     try:
@@ -207,6 +211,17 @@ def convertTcpFlagToHmmFormat(tcpFlags):
         case _:
             return np.nan
 
+def calcTimeDifference(data, last_timestamps):
+    timestamp, event, length_or_code = data
+
+    if event in last_timestamps:
+        time_diff = timestamp - last_timestamps[event]
+    else:
+        time_diff = np.nan
+
+
+    last_timestamps[event] = timestamp
+
+    return [event, length_or_code, time_diff]
+
 main()
-#E:\ethical hacking examin\python assesme t\Mal.pcapng
-#
